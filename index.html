@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>for my cute angel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#05020a; --pink:#ff2d78; --pink-soft:#ff7aa8; --ink:#f4eef2; --dim:#8a8290;
+  --sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --script:'Dancing Script','Segoe Script','Brush Script MT',cursive;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+body{background:radial-gradient(120% 70% at 50% 38%,#1a0714 0%,#07030c 55%,#030106 100%)}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+
+/* caption under the heart */
+#caption{position:fixed;left:0;right:0;bottom:calc(9vh + env(safe-area-inset-bottom,0px));text-align:center;
+  background:none;border:0;color:inherit;font:inherit;cursor:pointer;opacity:0;transition:opacity 1.2s ease 2.2s}
+body.on #caption{opacity:1}
+#caption small{display:block;font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+#caption .ty{display:block;max-width:320px;margin:0 auto;padding:0 20px;font:600 15px/1.7 var(--sans);letter-spacing:.12em}
+#caption .ty::before{content:"";display:block;width:44px;height:1px;margin:0 auto 12px;background:linear-gradient(90deg,transparent,#ff7aa8,transparent)}
+#caption .g{background:linear-gradient(90deg,#ffd6e6,#ff8db8 55%,#ff5c9a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 0 8px rgba(255,45,120,.35))}
+#caption:focus-visible,.start-btn:focus-visible,.letter-close:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
+
+/* start overlay */
+#startOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:20;
+  transition:opacity .9s ease,visibility .9s}
+#startOverlay.gone{opacity:0;visibility:hidden}
+.hologram-card{position:relative;width:min(78vw,300px);padding:34px 24px 26px;text-align:center;
+  background:linear-gradient(180deg,rgba(255,45,120,.07),rgba(255,45,120,.02));
+  border:1px solid rgba(255,45,120,.18);box-shadow:0 0 50px rgba(255,45,120,.12),inset 0 0 30px rgba(255,45,120,.05)}
+.corner{position:absolute;width:12px;height:12px;border:0 solid var(--pink)}
+.corner-tl{top:-1px;left:-1px;border-width:2px 0 0 2px}.corner-tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.corner-bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px}.corner-br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.card-icon{font-size:38px;line-height:1;animation:pulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(255,45,120,.8))}
+.card-title{margin:14px 0 18px;font:700 28px/1.15 var(--script);color:#fff;text-shadow:0 0 16px rgba(255,45,120,.5)}
+.loading-bar-container{height:2px;background:rgba(255,255,255,.08);overflow:hidden}
+#loadingBar{height:100%;width:0;background:linear-gradient(90deg,#ff2d78,#ff9ac0);box-shadow:0 0 10px var(--pink);transition:width .25s linear}
+.status-text{margin:12px 0 20px;font:400 9.5px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--dim);min-height:1.2em}
+.start-btn{position:relative;overflow:hidden;width:100%;padding:13px 10px;font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;
+  color:#ffd7e6;background:rgba(255,45,120,.14);border:1px solid rgba(255,45,120,.55);cursor:pointer;transition:opacity .4s,box-shadow .4s}
+.start-btn:disabled{opacity:.35;cursor:default}
+.start-btn:not(:disabled){box-shadow:0 0 24px rgba(255,45,120,.35)}
+.btn-shine{position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:shine 2.6s ease-in-out infinite}
+.start-btn:disabled .btn-shine{display:none}
+@keyframes shine{0%{left:-60%}60%,100%{left:140%}}
+.card-icon.mono{font-family:var(--script);font-weight:700;font-size:58px;color:#ffd6e6;text-shadow:0 0 18px rgba(255,45,120,.7)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+
+/* letter */
+#letterOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:15;
+  background:rgba(3,1,6,.88);opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s}
+#letterOverlay.open{opacity:1;visibility:visible}
+.letter-card{position:relative;width:min(100%,340px);min-height:230px;padding:26px 22px 38px;border-radius:14px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);transform:translateY(14px) scale(.97);transition:transform .5s ease}
+#letterOverlay.open .letter-card{transform:none}
+.letter-label{font:500 9.5px var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--pink)}
+.letter-close{position:absolute;top:10px;right:12px;width:36px;height:36px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer}
+.letter-text{margin:20px 0 0;font-size:13.5px;line-height:1.75;white-space:pre-wrap;min-height:9em}
+.caret{display:inline-block;width:1px;height:1em;margin-left:2px;background:var(--pink-soft);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.letter-sign{position:absolute;right:22px;bottom:14px;font:400 9px var(--mono);letter-spacing:.08em;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.card-icon,.btn-shine{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<button id="caption" type="button" aria-label="Open letter">
+  <span class="ty"><span class="g">TY FOR BEING MY FRIEND ONICHAN</span> 🪤</span>
+</button>
+
+<div id="startOverlay" class="start-overlay">
+  <div class="hologram-card">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="card-icon mono">R</div>
+    <h2 class="card-title">for my cute angel</h2>
+    <div class="loading-bar-container"><div id="loadingBar"></div></div>
+    <p class="status-text" id="statusText">Initializing system…</p>
+    <button class="start-btn" id="startBtn" disabled>
+      <span class="btn-text">Start the vibes</span><span class="btn-shine"></span>
+    </button>
+  </div>
+</div>
+
+<div id="letterOverlay" role="dialog" aria-modal="true" aria-label="Letter">
+  <div class="letter-card" id="letterCard">
+    <div class="letter-label">For rowaida</div>
+    <button class="letter-close" id="letterClose" aria-label="Close">✕</button>
+    <p class="letter-text" id="letterText"></p>
+    <div class="letter-sign">— HG</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const WORDS = ['Best friend','Day one','Friends','Always there','HG','Real one','Good vibes','Laughs','Trust','Legend','✦','Squad','Thank you','Loyal','Ride or die'];
+  const LETTER = 'To rowaida,\n\nSome people just make life lighter, and you are one of them. Thanks for the laughs, the honesty, and for always having my back.\n\nA real one, always.\n\n— HG';
+  const NUM_POINTS = 260, RAIN_DURATION = 2800, ASSEMBLE_DURATION = 2200;
+  const COLORS = ['#ff2d78','#ff5c9a','#ff0a54','#ff7aa8','#ffd0e0'];
+
+  const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+  let W, H, CX, CY, dpr, scale, fs;
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = innerWidth; H = innerHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    CX = W/2; CY = H*0.38;
+    scale = Math.min(W, H*0.62)/37;
+    fs = Math.max(.85, Math.min(1.4, W/430));
+  }
+  addEventListener('resize', resize); resize();
+
+  const rnd = (a,b) => a + Math.random()*(b-a);
+  const ease = t => 1 - Math.pow(1-t,3);
+
+  // heart surface/volume sample (x,y in heart units, z depth)
+  function heartPoint(){
+    const t = rnd(0, Math.PI*2), s = Math.random() < .6 ? rnd(.9,1) : Math.sqrt(Math.random());
+    const x = 16*Math.pow(Math.sin(t),3);
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+    return {x:x*s, y:y*s, z:rnd(-1,1)*6};
+  }
+
+  const sprites = new Map();
+  let fontsReady = false;
+  Promise.all([document.fonts.load('700 44px "Plus Jakarta Sans"','Best friend'), document.fonts.load('700 150px "Dancing Script"','rowaida')]).catch(() => {}).then(() => { makeName(); fontsReady = true; });
+  function sprite(text, color){
+    const key = text + color; let s = sprites.get(key); if(s) return s;
+    const fz = 44, f = `700 ${fz}px 'Plus Jakarta Sans',system-ui,sans-serif`;
+    const c = document.createElement('canvas'), x = c.getContext('2d');
+    x.font = f; const w = Math.ceil(x.measureText(text).width) + 28, h = fz + 28;
+    c.width = w; c.height = h; x.font = f; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.shadowColor = color; x.shadowBlur = 12; x.fillStyle = color; x.fillText(text, w/2, h/2);
+    s = {c, w, h}; sprites.set(key, s); return s;
+  }
+
+  let nameSprite = null, nameBox = null;
+  function makeName(){
+    const fz = 150, f = `700 ${fz}px 'Dancing Script','Segoe Script',cursive`;
+    const c = document.createElement('canvas'), x = c.getContext('2d');
+    x.font = f; const w = Math.ceil(x.measureText('rowaida').width) + 100, h = fz + 60;
+    c.width = w; c.height = h; x.font = f; x.textAlign = 'center'; x.textBaseline = 'middle';
+    const cy = h/2;
+    x.shadowColor = 'rgba(255,45,120,.75)'; x.shadowBlur = 12; x.fillStyle = '#fff';
+    x.fillText('rowaida', w/2, cy);
+    nameSprite = {c, w, h};
+  }
+  function drawName(el, b){
+    if(!nameSprite) return;
+    const a = Math.min(1, Math.max(0, (el - RAIN_DURATION*.6)/1400)); if(a <= 0) return;
+    const w = Math.min(W*.62, 340)*b, h = nameSprite.h*w/nameSprite.w, y = CY + scale*1.5;
+    ctx.globalAlpha = a;
+    ctx.drawImage(nameSprite.c, CX - w/2, y - h/2, w, h);
+    ctx.globalAlpha = 1;
+  }
+
+  class Particle3D{
+    constructor(i){
+      const p = heartPoint(); Object.assign(this, p);
+      this.text = WORDS[i % WORDS.length];
+      this.size = rnd(11,18)*fs;
+      this.color = COLORS[(Math.random()*COLORS.length)|0];
+      this.delay = Math.random()*RAIN_DURATION;
+      this.sx = rnd(-.3,1.3); this.sy = -rnd(.1,1.4);
+      this.sp = rnd(0,Math.PI*2);
+      this.sX = this.sY = 0; this.depth = 0; this.k = 1; this.a = 0;
+    }
+    update(now, rotY, rotX, beat){
+      const cy = Math.cos(rotY), sy = Math.sin(rotY), cx = Math.cos(rotX), sx = Math.sin(rotX);
+      let x = this.x*cy + this.z*sy, z = -this.x*sy + this.z*cy;
+      let y = this.y*cx - z*sx; z = this.y*sx + z*cx;
+      const persp = 70/(70 + z*1.4);
+      const tx = CX + x*scale*beat*persp, ty = CY + y*scale*beat*persp;
+      const p = Math.max(0, Math.min(1, (now - this.delay)/ASSEMBLE_DURATION));
+      const e = ease(p);
+      const fx = this.sx*W, fy = this.sy*H;
+      this.sX = fx + (tx-fx)*e; this.sY = fy + (ty-fy)*e;
+      this.k = persp; this.depth = z; this.a = p;
+    }
+    draw(now){
+      if(this.a <= 0) return;
+      const tw = .75 + .25*Math.sin(now*.003 + this.sp);
+      ctx.globalAlpha = Math.min(1, this.a*(.35 + .65*Math.max(0,(this.k-.78)/.45)))*tw;
+      if(!fontsReady) return;
+      const s = sprite(this.text, this.color), k = this.size*this.k/44, w = s.w*k, h = s.h*k;
+      ctx.drawImage(s.c, this.sX - w/2, this.sY - h/2, w, h);
+    }
+  }
+
+  class Sparkle{
+    constructor(x,y){
+      const a = rnd(0,Math.PI*2), v = rnd(1.5,5.5);
+      this.x=x; this.y=y; this.vx=Math.cos(a)*v; this.vy=Math.sin(a)*v; this.life=1; this.r=rnd(1,2.6);
+    }
+    draw(){
+      this.x+=this.vx; this.y+=this.vy; this.vx*=.96; this.vy=this.vy*.96+.05; this.life-=.017;
+      if(this.life<=0) return false;
+      ctx.globalAlpha = this.life; ctx.fillStyle = '#ff7aa8';
+      ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fill();
+      return true;
+    }
+  }
+
+  class BackgroundStar{
+    constructor(){ this.x=Math.random(); this.y=Math.random(); this.s=rnd(.4,1.4); this.sp=rnd(.0006,.002); this.ph=rnd(0,6.28); this.base=rnd(.05,.3); }
+    draw(now){
+      const a = this.base*(.5 + .5*Math.sin(now*this.sp + this.ph));
+      ctx.fillStyle = `rgba(255,255,255,${Math.max(.02,a)})`;
+      ctx.beginPath(); ctx.arc(this.x*W, this.y*H, this.s, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  const heart = Array.from({length:NUM_POINTS}, (_,i) => new Particle3D(i));
+  const stars = Array.from({length:70}, () => new BackgroundStar());
+  let sparkles = [], rotY = 0, rotX = .2, vel = .5, kick = 0, started = false, t0 = 0, last = 0;
+  let dragging = false, moved = 0, downT = 0, lx = 0;
+
+  function beatScale(now){
+    const ph = (now % 1100)/1100;
+    const lub = Math.exp(-Math.pow((ph-.08)/.05,2)), dub = .6*Math.exp(-Math.pow((ph-.26)/.06,2));
+    return 1 + .055*(lub+dub) + kick;
+  }
+  function burst(x,y){
+    const n = 14 + ((Math.random()*8)|0);
+    for(let i=0;i<n;i++) sparkles.push(new Sparkle(x,y));
+    kick = .09;
+  }
+
+  canvas.addEventListener('pointerdown', e => { if(!started) return; dragging = true; moved = 0; downT = performance.now(); lx = e.clientX; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove', e => {
+    if(!dragging) return;
+    const dx = e.clientX - lx; lx = e.clientX; moved += Math.abs(dx);
+    rotY += dx*.01;
+  });
+  const end = e => {
+    if(!dragging) return; dragging = false;
+    if(moved < 8 && performance.now()-downT < 350) burst(e.clientX, e.clientY);
+  };
+  canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', () => dragging = false);
+
+  function loop(now){
+    const dt = Math.min(.05, (now-last)/1000 || .016); last = now;
+    ctx.clearRect(0,0,W,H); ctx.shadowBlur = 0;
+    stars.forEach(s => s.draw(now)); ctx.globalAlpha = 1;
+    if(started){
+      const el = now - t0;
+      if(!dragging) rotY += dt*.6;
+      kick *= .9;
+      const b = beatScale(now);
+      heart.forEach(p => p.update(el, rotY, rotX, b));
+      heart.sort((a,b2) => b2.depth - a.depth);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      let mid = heart.findIndex(p => p.depth < 0); if(mid < 0) mid = heart.length;
+      for(let i = 0; i < mid; i++) heart[i].draw(now);
+      for(let i = mid; i < heart.length; i++) heart[i].draw(now);
+      sparkles = sparkles.filter(s => s.draw());
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // start overlay: fake boot sequence, then enable button
+  const bar = document.getElementById('loadingBar'), status = document.getElementById('statusText'), btn = document.getElementById('startBtn');
+  let prog = 0;
+  const msgs = ['Initializing system…','Loading good memories…','Compiling friendship…'];
+  const boot = setInterval(() => {
+    prog = Math.min(100, prog + rnd(6,16));
+    bar.style.width = prog + '%';
+    status.textContent = msgs[Math.min(2, (prog/34)|0)];
+    if(prog >= 100){ clearInterval(boot); status.textContent = 'Ready to roll'; btn.disabled = false; }
+  }, 260);
+  btn.addEventListener('click', () => {
+    document.getElementById('startOverlay').classList.add('gone');
+    setTimeout(() => { document.getElementById('startOverlay').style.display = 'none'; }, 1000);
+    document.body.classList.add('on');
+    t0 = performance.now(); started = true;
+    if(navigator.vibrate) navigator.vibrate(30);
+  });
+
+  // letter with typewriter
+  const ov = document.getElementById('letterOverlay'), txt = document.getElementById('letterText');
+  let typer = null;
+  function openLetter(){
+    ov.classList.add('open'); txt.textContent = ''; let i = 0;
+    const caret = document.createElement('span'); caret.className = 'caret';
+    clearInterval(typer);
+    typer = setInterval(() => {
+      txt.textContent = LETTER.slice(0, ++i); txt.appendChild(caret);
+      if(i >= LETTER.length){ clearInterval(typer); }
+    }, 45);
+  }
+  function closeLetter(){ ov.classList.remove('open'); clearInterval(typer); }
+  document.getElementById('caption').addEventListener('click', openLetter);
+  document.getElementById('letterClose').addEventListener('click', e => { e.stopPropagation(); closeLetter(); });
+  ov.addEventListener('click', e => { if(e.target === ov) closeLetter(); });
+  addEventListener('keydown', e => { if(e.key === 'Escape') closeLetter(); });
+})();
+</script>
+</body>
+</html>
